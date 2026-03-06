@@ -94,5 +94,26 @@ void main() {
         matchesGoldenFile('../screenshots/04_settings.png'),
       );
     });
+
+    testWidgets('05_gear_detail', (tester) async {
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('設定'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('カメラ'));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('../screenshots/05_gear_detail.png'),
+      );
+    });
   });
 }

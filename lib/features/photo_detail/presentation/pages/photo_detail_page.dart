@@ -52,6 +52,38 @@ class _PhotoDetailPageState extends ConsumerState<PhotoDetailPage> {
                   .toggleFavorite(photo.id);
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  backgroundColor: const Color(0xFF16213E),
+                  title: const Text('写真を削除'),
+                  content: const Text('この写真データを削除しますか？この操作は取り消せません。'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('キャンセル'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        ref
+                            .read(photoListProvider.notifier)
+                            .deletePhoto(photo.id);
+                        Navigator.pop(context);
+                        Navigator.pop(this.context);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFFE94560),
+                      ),
+                      child: const Text('削除'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
       body: ListView(
