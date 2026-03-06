@@ -6,6 +6,7 @@ import '../../../../shared/widgets/stat_card.dart';
 import '../widgets/focal_length_chart.dart';
 import '../widgets/lens_usage_chart.dart';
 import '../widgets/recent_activity.dart';
+import '../widgets/shooting_calendar.dart';
 
 class HomePage extends ConsumerWidget {
   final void Function(int) onNavigate;
@@ -107,6 +108,8 @@ class HomePage extends ConsumerWidget {
               ),
             )
           else ...[
+            ShootingCalendar(photos: photos),
+            const SizedBox(height: 12),
             LensUsageChart(photos: photos),
             const SizedBox(height: 12),
             FocalLengthChart(photos: photos),
