@@ -1,0 +1,5 @@
+package com.shotlog.shot_log
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
