@@ -2,19 +2,51 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/mock_data.dart';
 import '../models/photo_data.dart';
+import '../services/database_service.dart';
 
 final photoListProvider =
     StateNotifierProvider<PhotoListNotifier, List<PhotoData>>(
         (ref) => PhotoListNotifier());
 
 class PhotoListNotifier extends StateNotifier<List<PhotoData>> {
-  PhotoListNotifier() : super(List.from(mockPhotos));
+  PhotoListNotifier() : super(List.from(mockPhotos)) {
+    _loadFromDb();
+  }
+
+  PhotoListNotifier.withData(super.data);
+
+  Future<void> _loadFromDb() async {
+    try {
+      final count = await DatabaseService.count();
+      if (count == 0) {
+        await DatabaseService.insertPhotos(mockPhotos);
+      }
+      state = await DatabaseService.getAllPhotos();
+    } catch (_) {
+      // DB not available (e.g. in tests), keep mock data
+    }
+  }
+
+  Future<void> addPhoto(PhotoData photo) async {
+    state = [...state, photo];
+    try {
+      await DatabaseService.insertPhoto(photo);
+    } catch (_) {}
+  }
+
+  Future<void> addPhotos(List<PhotoData> photos) async {
+    state = [...state, ...photos];
+    try {
+      await DatabaseService.insertPhotos(photos);
+    } catch (_) {}
+  }
 
   void updateRating(String id, int rating) {
     state = [
       for (final photo in state)
         if (photo.id == id) photo.copyWith(rating: rating) else photo,
     ];
+    _persistUpdate(id);
   }
 
   void toggleFavorite(String id) {
@@ -25,6 +57,7 @@ class PhotoListNotifier extends StateNotifier<List<PhotoData>> {
         else
           photo,
     ];
+    _persistUpdate(id);
   }
 
   void updateMemo(String id, String memo) {
@@ -32,10 +65,25 @@ class PhotoListNotifier extends StateNotifier<List<PhotoData>> {
       for (final photo in state)
         if (photo.id == id) photo.copyWith(memo: memo) else photo,
     ];
+    _persistUpdate(id);
   }
 
   void deletePhoto(String id) {
     state = state.where((photo) => photo.id != id).toList();
+    _persistDelete(id);
+  }
+
+  Future<void> _persistDelete(String id) async {
+    try {
+      await DatabaseService.deletePhoto(id);
+    } catch (_) {}
+  }
+
+  Future<void> _persistUpdate(String id) async {
+    try {
+      final updated = state.firstWhere((p) => p.id == id);
+      await DatabaseService.updatePhoto(updated);
+    } catch (_) {}
   }
 }
 
@@ -151,7 +199,7 @@ final analyticsPhotosProvider = Provider<List<PhotoData>>((ref) {
   final photos = ref.watch(photoListProvider);
   final period = ref.watch(analyticsPeriodProvider);
 
-  final now = DateTime(2026, 3, 6);
+  final now = DateTime.now();
 
   switch (period) {
     case AnalyticsPeriod.all:

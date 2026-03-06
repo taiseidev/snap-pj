@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:shot_log/app.dart';
 import 'package:shot_log/shared/providers/photo_provider.dart';
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('ja');
+  });
+
   testWidgets('App renders dashboard', (WidgetTester tester) async {
     await tester.pumpWidget(
       const ProviderScope(child: ShotLogApp()),

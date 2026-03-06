@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/providers/photo_provider.dart';
+import '../../../../shared/services/photo_import_service.dart';
 import '../../../../shared/widgets/stat_card.dart';
 import '../widgets/focal_length_chart.dart';
 import '../widgets/lens_usage_chart.dart';
@@ -24,8 +25,35 @@ class HomePage extends ConsumerWidget {
         title: const Text('ShotLog'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            icon: const Icon(Icons.add_photo_alternate_outlined),
+            tooltip: '写真をインポート',
+            onPressed: () async {
+              try {
+                final photos =
+                    await PhotoImportService.pickAndImportPhotos();
+                if (photos.isEmpty) return;
+                await ref
+                    .read(photoListProvider.notifier)
+                    .addPhotos(photos);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${photos.length}枚の写真をインポートしました'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              } catch (_) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('写真のインポートに失敗しました'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
+            },
           ),
         ],
       ),

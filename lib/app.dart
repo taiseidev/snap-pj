@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/analytics/presentation/pages/analytics_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/settings/presentation/pages/settings_page.dart';
 import 'features/timeline/presentation/pages/timeline_page.dart';
+import 'shared/providers/theme_provider.dart';
 
-class ShotLogApp extends StatelessWidget {
+class ShotLogApp extends ConsumerWidget {
   const ShotLogApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+
     return MaterialApp(
       title: 'ShotLog',
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode.toThemeMode,
       debugShowCheckedModeBanner: false,
       home: const AppShell(),
     );

@@ -1,8 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../shared/providers/photo_provider.dart';
+import '../../../../shared/providers/theme_provider.dart';
+import '../../../../shared/services/photo_import_service.dart';
 import 'gear_detail_page.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -89,16 +95,29 @@ class SettingsPage extends ConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('データをエクスポートしました'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        try {
+                          final dir = await getApplicationDocumentsDirectory();
+                          final file = File(
+                              '${dir.path}/shotlog_export_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.csv');
+                          await file.writeAsString(csvLines.join('\n'));
+                          await Share.shareXFiles(
+                            [XFile(file.path)],
+                            subject: 'ShotLog データエクスポート',
+                          );
+                        } catch (_) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('エクスポートに失敗しました'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        }
                       },
-                      icon: const Icon(Icons.download),
+                      icon: const Icon(Icons.share),
                       label: const Text('エクスポート'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE94560),
@@ -198,13 +217,32 @@ class SettingsPage extends ConsumerWidget {
                   ),
                   trailing:
                       const Icon(Icons.chevron_right, color: Colors.white38),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('写真インポート機能は今後のアップデートで対応予定です'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
+                  onTap: () async {
+                    try {
+                      final photos =
+                          await PhotoImportService.pickAndImportPhotos();
+                      if (photos.isEmpty) return;
+                      await ref
+                          .read(photoListProvider.notifier)
+                          .addPhotos(photos);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${photos.length}枚の写真をインポートしました'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    } catch (_) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('写真のインポートに失敗しました'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    }
                   },
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
@@ -231,17 +269,59 @@ class SettingsPage extends ConsumerWidget {
           Card(
             child: Column(
               children: [
-                ListTile(
-                  leading:
-                      const Icon(Icons.palette, color: Colors.white54),
-                  title: const Text('テーマ'),
-                  subtitle: Text(
-                    'ダーク',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                  trailing:
-                      const Icon(Icons.chevron_right, color: Colors.white38),
-                ),
+                Builder(builder: (context) {
+                  final currentTheme = ref.watch(themeModeProvider);
+                  return ListTile(
+                    leading: const Icon(Icons.palette, color: Colors.white54),
+                    title: const Text('テーマ'),
+                    subtitle: Text(
+                      currentTheme.label,
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: Colors.white38),
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: theme.cardTheme.color,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        builder: (context) {
+                          return SafeArea(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(height: 16),
+                                Text('テーマ設定',
+                                    style: theme.textTheme.titleLarge),
+                                const SizedBox(height: 8),
+                                for (final mode in AppThemeMode.values)
+                                  RadioListTile<AppThemeMode>(
+                                    title: Text(mode.label),
+                                    value: mode,
+                                    groupValue: currentTheme,
+                                    activeColor: const Color(0xFFE94560),
+                                    onChanged: (value) {
+                                      if (value != null) {
+                                        ref
+                                            .read(
+                                                themeModeProvider.notifier)
+                                            .setTheme(value);
+                                        Navigator.pop(context);
+                                      }
+                                    },
+                                  ),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                }),
                 const Divider(height: 1, indent: 16, endIndent: 16),
                 ListTile(
                   leading:
