@@ -84,17 +84,41 @@ class HomePage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          LensUsageChart(photos: photos),
-          const SizedBox(height: 12),
-          FocalLengthChart(photos: photos),
-          const SizedBox(height: 12),
-          RecentActivity(
-            photos: photos,
-            onPhotoTap: (photo) {
-              ref.read(selectedPhotoProvider.notifier).state = photo;
-              onNavigate(1);
-            },
-          ),
+          if (photos.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: Column(
+                  children: [
+                    const Icon(Icons.camera_alt_outlined,
+                        size: 64, color: Colors.white24),
+                    const SizedBox(height: 16),
+                    Text(
+                      '撮影データがありません',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '写真をインポートして撮影傾向を分析しましょう',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else ...[
+            LensUsageChart(photos: photos),
+            const SizedBox(height: 12),
+            FocalLengthChart(photos: photos),
+            const SizedBox(height: 12),
+            RecentActivity(
+              photos: photos,
+              onPhotoTap: (photo) {
+                ref.read(selectedPhotoProvider.notifier).state = photo;
+                onNavigate(1);
+              },
+            ),
+          ],
           const SizedBox(height: 32),
         ],
       ),
