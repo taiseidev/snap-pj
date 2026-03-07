@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/photo_data.dart';
 import '../../../../shared/providers/photo_provider.dart';
+import '../../../../shared/widgets/photo_thumbnail.dart';
 
 class PhotoDetailPage extends ConsumerStatefulWidget {
   final PhotoData photo;
@@ -89,24 +90,11 @@ class _PhotoDetailPageState extends ConsumerState<PhotoDetailPage> {
       body: ListView(
         children: [
           // Photo preview area
-          Container(
+          PhotoThumbnail(
+            filePath: photo.filePath,
+            focalLength: photo.focalLength,
             height: 280,
-            color: _colorFromFocalLength(photo.focalLength),
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.photo_camera,
-                      color: Colors.white24, size: 64),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${photo.focalLength.toInt()}mm  f/${photo.aperture}',
-                    style: const TextStyle(
-                        color: Colors.white38, fontSize: 16),
-                  ),
-                ],
-              ),
-            ),
+            width: double.infinity,
           ),
 
           Padding(
@@ -179,12 +167,6 @@ class _PhotoDetailPageState extends ConsumerState<PhotoDetailPage> {
     );
   }
 
-  Color _colorFromFocalLength(double fl) {
-    if (fl <= 35) return const Color(0xFF1A3A5C);
-    if (fl <= 70) return const Color(0xFF2A1A4C);
-    if (fl <= 135) return const Color(0xFF1A4C3A);
-    return const Color(0xFF4C3A1A);
-  }
 }
 
 class _ExifGrid extends StatelessWidget {
@@ -199,8 +181,8 @@ class _ExifGrid extends StatelessWidget {
       _ExifItem(Icons.lens, 'レンズ', photo.lensModel),
       _ExifItem(Icons.straighten, '焦点距離', '${photo.focalLength.toInt()}mm'),
       _ExifItem(Icons.camera_alt, 'F値', 'f/${photo.aperture}'),
-      _ExifItem(Icons.shutter_speed, 'SS', '${photo.shutterSpeed}s'),
-      _ExifItem(Icons.iso, 'ISO', '${photo.iso}'),
+      _ExifItem(Icons.speed, 'SS', '${photo.shutterSpeed}s'),
+      _ExifItem(Icons.grain, 'ISO', '${photo.iso}'),
       _ExifItem(Icons.access_time,
           '撮影日時', DateFormat('yyyy/M/d HH:mm').format(photo.shotAt)),
     ];

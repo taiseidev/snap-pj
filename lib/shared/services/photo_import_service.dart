@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:exif/exif.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -53,7 +53,8 @@ class PhotoImportService {
         shutterSpeed: exifData.shutterSpeed ?? '1/125',
         iso: exifData.iso ?? 400,
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Photo import failed: $e');
       return null;
     }
   }
@@ -72,7 +73,8 @@ class PhotoImportService {
         iso: _getInt(tags, 'EXIF ISOSpeedRatings'),
         shotAt: _getDateTime(tags, 'EXIF DateTimeOriginal'),
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('EXIF read failed: $e');
       return _ExifResult();
     }
   }
@@ -94,7 +96,8 @@ class PhotoImportService {
         return double.parse(parts[0]) / double.parse(parts[1]);
       }
       return double.tryParse(value);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('EXIF parse error: $e');
       return null;
     }
   }
@@ -112,7 +115,8 @@ class PhotoImportService {
       // EXIF format: "2024:01:15 14:30:00"
       final value = tag.printable.replaceFirst(RegExp(r'^(\d{4}):(\d{2}):'), r'$1-$2-');
       return DateTime.tryParse(value.replaceFirst(':', '-').replaceFirst(':', '-'));
-    } catch (_) {
+    } catch (e) {
+      debugPrint('EXIF parse error: $e');
       return null;
     }
   }

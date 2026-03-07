@@ -25,8 +25,8 @@ class ThemeModeNotifier extends StateNotifier<AppThemeMode> {
           orElse: () => AppThemeMode.dark,
         );
       }
-    } catch (_) {
-      // SharedPreferences not available (e.g. in tests)
+    } catch (e) {
+      debugPrint('SharedPreferences load failed: $e');
     }
   }
 
@@ -35,7 +35,9 @@ class ThemeModeNotifier extends StateNotifier<AppThemeMode> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_key, mode.name);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('SharedPreferences save failed: $e');
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/mock_data.dart';
@@ -22,8 +23,8 @@ class PhotoListNotifier extends StateNotifier<List<PhotoData>> {
         await DatabaseService.insertPhotos(mockPhotos);
       }
       state = await DatabaseService.getAllPhotos();
-    } catch (_) {
-      // DB not available (e.g. in tests), keep mock data
+    } catch (e) {
+      debugPrint('DB load failed: $e');
     }
   }
 
@@ -31,14 +32,18 @@ class PhotoListNotifier extends StateNotifier<List<PhotoData>> {
     state = [...state, photo];
     try {
       await DatabaseService.insertPhoto(photo);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('DB operation failed: $e');
+    }
   }
 
   Future<void> addPhotos(List<PhotoData> photos) async {
     state = [...state, ...photos];
     try {
       await DatabaseService.insertPhotos(photos);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('DB operation failed: $e');
+    }
   }
 
   void updateRating(String id, int rating) {
@@ -76,14 +81,18 @@ class PhotoListNotifier extends StateNotifier<List<PhotoData>> {
   Future<void> _persistDelete(String id) async {
     try {
       await DatabaseService.deletePhoto(id);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('DB operation failed: $e');
+    }
   }
 
   Future<void> _persistUpdate(String id) async {
     try {
       final updated = state.firstWhere((p) => p.id == id);
       await DatabaseService.updatePhoto(updated);
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('DB operation failed: $e');
+    }
   }
 }
 

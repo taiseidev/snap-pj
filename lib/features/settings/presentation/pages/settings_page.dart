@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/constants.dart';
 import '../../../../shared/providers/photo_provider.dart';
 import '../../../../shared/providers/theme_provider.dart';
 import '../../../../shared/services/photo_import_service.dart';
@@ -328,7 +329,7 @@ class SettingsPage extends ConsumerWidget {
                       const Icon(Icons.info_outline, color: Colors.white54),
                   title: const Text('バージョン'),
                   subtitle: Text(
-                    '1.0.0',
+                    appVersion,
                     style: theme.textTheme.bodySmall,
                   ),
                 ),

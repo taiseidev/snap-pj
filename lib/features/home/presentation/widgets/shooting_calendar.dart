@@ -10,7 +10,7 @@ class ShootingCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime(2026, 3, 6);
+    final now = DateTime.now();
     final shotCounts = <String, int>{};
     for (final photo in photos) {
       final key = _dateKey(photo.shotAt);

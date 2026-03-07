@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../shared/models/photo_data.dart';
 import '../../../../shared/providers/photo_provider.dart';
+import '../../../../shared/widgets/photo_thumbnail.dart';
 import '../../../photo_detail/presentation/pages/photo_detail_page.dart';
 
 class TimelinePage extends ConsumerStatefulWidget {
@@ -352,26 +353,9 @@ class _PhotoTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Container(
-              color: _colorFromFocalLength(photo.focalLength),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.photo_camera,
-                        color: Colors.white24, size: 28),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${photo.focalLength.toInt()}mm',
-                      style: const TextStyle(
-                        color: Colors.white54,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            child: PhotoThumbnail(
+              filePath: photo.filePath,
+              focalLength: photo.focalLength,
             ),
           ),
           Positioned(
@@ -417,10 +401,4 @@ class _PhotoTile extends StatelessWidget {
     );
   }
 
-  Color _colorFromFocalLength(double fl) {
-    if (fl <= 35) return const Color(0xFF1A3A5C);
-    if (fl <= 70) return const Color(0xFF2A1A4C);
-    if (fl <= 135) return const Color(0xFF1A4C3A);
-    return const Color(0xFF4C3A1A);
-  }
 }
